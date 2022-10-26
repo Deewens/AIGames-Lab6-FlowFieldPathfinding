@@ -9,8 +9,8 @@
 /// load and setup the image
 /// </summary>
 Game::Game() :
-	m_window{ sf::VideoMode{ 800U, 600U, 32U }, "SFML Game" },
-	m_grid(50, 50, 5),
+	m_window{ sf::VideoMode{ 800U, 800U, 32U }, "SFML Game" },
+	m_grid(1000, 1000, 60),
 	m_exitGame{false} //when true game will exit
 {
 }
@@ -99,7 +99,7 @@ void Game::update(sf::Time t_deltaTime)
 /// </summary>
 void Game::render()
 {
-	m_window.clear(sf::Color::White);
+	m_window.clear(sf::Color::Black);
 
 	m_window.draw(m_grid);
 	

@@ -94,6 +94,7 @@
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Node.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="ASSETS\FONTS\ariblk.ttf" />
@@ -101,6 +102,7 @@
   <ItemGroup>
     <ClInclude Include="Game.hpp" />
     <ClInclude Include="Grid.hpp" />
+    <ClInclude Include="Node.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
