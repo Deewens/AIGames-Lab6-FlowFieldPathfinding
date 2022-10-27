@@ -95,6 +95,8 @@
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Node.cpp" />
+    <ClInclude Include="ResourceManager\ResourceIdentifiers.hpp" />
+    <ClInclude Include="ResourceManager\ResourceManager.inl" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="ASSETS\FONTS\ariblk.ttf" />
@@ -103,6 +105,7 @@
     <ClInclude Include="Game.hpp" />
     <ClInclude Include="Grid.hpp" />
     <ClInclude Include="Node.hpp" />
+    <ClInclude Include="ResourceManager\ResourceManager.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

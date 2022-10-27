@@ -1,10 +1,12 @@
 ﻿#pragma once
 
 #include <SFML/Graphics/Drawable.hpp>
-#include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/VertexArray.hpp>
+#include <SFML/System/Time.hpp>
 
 #include "Node.hpp"
+#include "ResourceManager/ResourceManager.hpp"
+#include "ResourceManager/ResourceIdentifiers.hpp"
 
 class Grid : public sf::Drawable
 {
@@ -14,21 +16,21 @@ private:
 
     sf::VertexArray m_vertices;
     sf::VertexArray m_outlineVertices;
-    std::vector<sf::RectangleShape> m_rectangles;
 
     std::vector<Node> m_nodes;
     int m_nodeSize;
 
-
 public:
-    Grid(int width, int height, int nodeSize);
+    Grid(const FontManager& fontManager, int width, int height, int nodeSize);
 
-protected:
-    void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+    void update(sf::Time dt);
+
+    std::vector<Node>& getNodes();
 
 private:
-    void createVertices();
+    void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
+    void createVertices();
     void createVertex(int x, int y);
     void createOutlineVertex(int x, int y);
 };
