@@ -13,7 +13,8 @@ Game::Game() :
     m_exitGame{false} //when true game will exit
 {
     loadFonts();
-    m_grid = new Grid(m_fontManager, ScreenSize, ScreenSize, 100);
+    
+    m_grid = new Grid(m_fontManager, 50, 50, ScreenSize / 50);
 }
 
 /// <summary>
@@ -42,16 +43,13 @@ void Game::run()
     while (m_window.isOpen())
     {
         processEvents(); // as many as possible
-        sf::Time elapsedTime = clock.restart();
-        timeSinceLastUpdate += elapsedTime;
+        timeSinceLastUpdate += clock.restart();
         while (timeSinceLastUpdate > timePerFrame)
         {
             timeSinceLastUpdate -= timePerFrame;
             processEvents(); // at least 60 fps
             update(timePerFrame); //60 fps
         }
-        
-        updateFPSCounter(elapsedTime);
         
         render(); // as many as possible
     }
@@ -120,15 +118,4 @@ void Game::render()
 void Game::loadFonts()
 {
     m_fontManager.load(Assets::Font::ArialBlack, "ASSETS/FONTS/ariblk.ttf");
-}
-
-void Game::updateFPSCounter(sf::Time elapsedTime)
-{
-    m_updateTime += elapsedTime;
-    m_framesPerSecond += 1;
-    
-    std::cout << "FPS: " + std::to_string(m_framesPerSecond) << std::endl;
-
-    m_updateTime -= sf::seconds(1.0f);
-    m_framesPerSecond = 0;
 }

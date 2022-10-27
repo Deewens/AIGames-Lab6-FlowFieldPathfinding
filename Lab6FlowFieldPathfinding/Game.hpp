@@ -27,8 +27,6 @@ private:
 
     void loadFonts();
 
-    void updateFPSCounter(sf::Time elapsedTime);
-
     unsigned int static constexpr ScreenSize = 800U;
 
     sf::RenderWindow m_window; // main SFML window
@@ -36,9 +34,6 @@ private:
     FontManager m_fontManager;
 
     Grid* m_grid;
-
-    sf::Time m_updateTime;
-    std::size_t m_framesPerSecond;
 
     bool m_exitGame; // control exiting game
 };

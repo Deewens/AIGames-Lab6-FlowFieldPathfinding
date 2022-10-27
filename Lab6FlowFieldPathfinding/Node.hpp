@@ -11,7 +11,7 @@ private:
     int m_x = 0, m_y = 0;
     int m_nodeSize;
 
-    int m_cost = 0;
+    int m_cost;
 
     sf::Text m_costText;
 
@@ -20,5 +20,9 @@ public:
 
     int getCost() const;
     void setCost(int cost);
+    
     const sf::Text& getCostText() const;
+
+    int getX() const;
+    int getY() const;
 };

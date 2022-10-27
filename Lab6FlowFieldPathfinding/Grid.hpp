@@ -30,6 +30,8 @@ public:
 private:
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
+    void createHeatmap(sf::Vector2i goalPosition);
+    
     void createVertices();
     void createVertex(int x, int y);
     void createOutlineVertex(int x, int y);
