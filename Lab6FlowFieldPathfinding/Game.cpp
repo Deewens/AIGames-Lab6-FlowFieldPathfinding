@@ -13,7 +13,7 @@ Game::Game() :
     m_exitGame{false} //when true game will exit
 {
     loadFonts();
-    
+
     m_grid = new Grid(m_fontManager, 50, 50, ScreenSize / 50);
 }
 
@@ -50,7 +50,7 @@ void Game::run()
             processEvents(); // at least 60 fps
             update(timePerFrame); //60 fps
         }
-        
+
         render(); // as many as possible
     }
 }
@@ -73,6 +73,11 @@ void Game::processEvents()
         {
             processKeys(newEvent);
         }
+
+        if (sf::Event::MouseButtonPressed)
+        {
+            processMouse(newEvent);
+        }
     }
 }
 
@@ -81,11 +86,23 @@ void Game::processEvents()
 /// deal with key presses from the user
 /// </summary>
 /// <param name="t_event">key press event</param>
-void Game::processKeys(sf::Event t_event)
+void Game::processKeys(const sf::Event t_event)
 {
     if (sf::Keyboard::Escape == t_event.key.code)
     {
         m_exitGame = true;
+    }
+}
+
+void Game::processMouse(const sf::Event& t_event) const
+{
+    if (sf::Mouse::Left == t_event.mouseButton.button)
+    {
+        const sf::Vector2i mousePosition = sf::Vector2i(t_event.mouseButton.x, t_event.mouseButton.y);
+        
+        // Convert window pixel coordinates to the grid coordinates
+        const sf::Vector2i mouseGridPosition = mousePosition / m_grid->getNodeSize();
+        m_grid->createHeatmap(mouseGridPosition);
     }
 }
 

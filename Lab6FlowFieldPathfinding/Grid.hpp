@@ -14,25 +14,20 @@ private:
     int m_width;
     int m_height;
 
-    sf::VertexArray m_vertices;
-    sf::VertexArray m_outlineVertices;
-
     std::vector<Node> m_nodes;
     int m_nodeSize;
 
 public:
     Grid(const FontManager& fontManager, int width, int height, int nodeSize);
 
+    void createHeatmap(sf::Vector2i goalPosition);
+    
     void update(sf::Time dt);
-
+    
     std::vector<Node>& getNodes();
+    int getNodeSize() const;
 
 private:
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
-    void createHeatmap(sf::Vector2i goalPosition);
-    
-    void createVertices();
-    void createVertex(int x, int y);
-    void createOutlineVertex(int x, int y);
 };

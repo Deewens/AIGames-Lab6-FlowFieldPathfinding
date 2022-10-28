@@ -95,6 +95,7 @@
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Node.cpp" />
+    <ClInclude Include="Direction.hpp" />
     <ClInclude Include="ResourceManager\ResourceIdentifiers.hpp" />
     <ClInclude Include="ResourceManager\ResourceManager.inl" />
   </ItemGroup>

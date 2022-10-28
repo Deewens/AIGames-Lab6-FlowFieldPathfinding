@@ -22,12 +22,13 @@ public:
 private:
     void processEvents();
     void processKeys(sf::Event t_event);
+    void processMouse(const sf::Event& t_event) const;
     void update(sf::Time t_deltaTime);
     void render();
 
     void loadFonts();
 
-    unsigned int static constexpr ScreenSize = 800U;
+    unsigned int static constexpr ScreenSize = 1200U;
 
     sf::RenderWindow m_window; // main SFML window
 
