@@ -194,9 +194,14 @@ std::vector<std::shared_ptr<Node>> Node::getNeighbours(bool includeDiagonals) co
         }
 
         // Calculate the node cell in the list
-        auto neighbour = m_grid.findNode(neighbourX, neighbourY);
+        auto neighbour = m_grid.findNode({neighbourX, neighbourY});
         neighbours.push_back(neighbour);
     }
 
     return neighbours;
+}
+
+sf::Vector2i Node::getCoordinates()
+{
+    return m_coordinates;
 }

@@ -25,7 +25,12 @@ public:
 
     void calculateFlowField(sf::Vector2<int> goalPosition);
 
-    std::shared_ptr<Node> findNode(int x, int y);
+    std::shared_ptr<Node> findNode(const sf::Vector2i& coordinates);
+    
+    std::shared_ptr<Node> findNodeByPosition(const sf::Vector2f& worldPosition);
+
+    sf::Vector2i convertWorldToGridCoordinates(const sf::Vector2f& worldPosition);
+    sf::Vector2f convertWorldToGridPosition(const sf::Vector2f& worldPosition);
 
     void addObstacle(int x, int y);
     void removeObstacle(int x, int y);

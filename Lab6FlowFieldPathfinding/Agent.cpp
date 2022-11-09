@@ -1,4 +1,7 @@
 #include "Agent.hpp"
+
+#include <iostream>
+
 #include "utils/VectorUtils.hpp"
 
 Agent::Agent(Grid& grid, sf::Vector2f startPosition, float maxSpeed, float maxForce) :
@@ -40,7 +43,7 @@ void Agent::setRotation(float newRotation)
 }
 
 
-void Agent::update(sf::Time dt)
+void Agent::update(const sf::Time dt)
 {
     auto forceToApply = steeringBehaviourFlowField();
 
@@ -64,33 +67,32 @@ void Agent::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
 sf::Vector2f Agent::steeringBehaviourFlowField()
 {
-    const float halfSize = m_grid.getNodeSize() / 2;
+    const sf::Vector2i nodeCoords = m_grid.convertWorldToGridCoordinates(getPosition());
 
-    sf::Vector2f floor = VectorUtils::floor(sf::Vector2f((getPosition().x - 30) / m_grid.getNodeSize(),
-                                                         (getPosition().y - 30) / m_grid.getNodeSize()));
+    const auto f00 = sf::Vector2f(m_grid.findNode({nodeCoords.x, nodeCoords.y})->getFlowFieldDirection());
+    const auto f01 = sf::Vector2f(m_grid.findNode({nodeCoords.x, nodeCoords.y + 1})->getFlowFieldDirection());
+    const auto f10 = sf::Vector2f(m_grid.findNode({nodeCoords.x + 1, nodeCoords.y})->getFlowFieldDirection());
+    const auto f11 = sf::Vector2f(m_grid.findNode({nodeCoords.x + 1, nodeCoords.y + 1})->getFlowFieldDirection());
 
-    auto f00 = sf::Vector2f(m_grid.findNode(floor.x, floor.y)->getFlowFieldDirection());
-    auto f01 = sf::Vector2f(m_grid.findNode(floor.x, floor.y + 1)->getFlowFieldDirection());
-    auto f10 = sf::Vector2f(m_grid.findNode(floor.x + 1, floor.y)->getFlowFieldDirection());
-    auto f11 = sf::Vector2f(m_grid.findNode(floor.x + 1, floor.y + 1)->getFlowFieldDirection());
+    const sf::Vector2f nodeGridPos = m_grid.convertWorldToGridPosition(getPosition());
 
-    auto xWeight = ((getPosition().x - 30) / m_grid.getNodeSize()) - floor.x;
+    const auto xWeight = nodeGridPos.x - static_cast<float>(nodeCoords.x);
 
-    auto top = (f00 * (1 - xWeight)) + (f10 * xWeight);
-    auto bottom = (f01 * (1 - xWeight)) + (f11 * xWeight);
+    const auto top = (f00 * (1 - xWeight)) + (f10 * xWeight);
+    const auto bottom = (f01 * (1 - xWeight)) + (f11 * xWeight);
 
-    auto yWeight = ((getPosition().y - 30) / m_grid.getNodeSize()) - floor.y;
+    const auto yWeight = nodeGridPos.y - static_cast<float>(nodeCoords.y);
 
-    auto direction = VectorUtils::normalize((top * (1 - yWeight)) + (bottom * yWeight));
+    const auto direction = VectorUtils::normalize((top * (1 - yWeight)) + (bottom * yWeight));
 
     if (std::isnan(VectorUtils::getLength(direction)))
     {
         return {0, 0};
     }
 
-    auto desiredVelocity = direction * m_maxSpeed;
+    const auto desiredVelocity = direction * m_maxSpeed;
 
-    auto velocityChange = desiredVelocity - m_velocity;
+    const auto velocityChange = desiredVelocity - m_velocity;
 
     return velocityChange * (m_maxForce / m_maxSpeed);
 }

@@ -29,6 +29,7 @@ public:
 
     std::vector<std::shared_ptr<Node>> getNeighbours(bool includeDiagonals = true) const;
 
+    sf::Vector2i getCoordinates();
 private:
     void setQuadColor(sf::Color color);
 

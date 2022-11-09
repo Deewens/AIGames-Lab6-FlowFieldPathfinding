@@ -46,9 +46,35 @@ float Grid::getNodeSize() const
     return m_nodeSize;
 }
 
-std::shared_ptr<Node> Grid::findNode(const int x, const int y)
+std::shared_ptr<Node> Grid::findNode(const sf::Vector2i& coordinates)
 {
-    return m_nodes.at(y + m_width * x);
+    return m_nodes.at(coordinates.y + m_width * coordinates.x);
+}
+
+std::shared_ptr<Node> Grid::findNodeByPosition(const sf::Vector2f& worldPosition)
+{
+    const sf::Vector2i nodeCoordinates = convertWorldToGridCoordinates(worldPosition);
+    return findNode(nodeCoordinates);
+}
+
+sf::Vector2i Grid::convertWorldToGridCoordinates(const sf::Vector2f& worldPosition)
+{
+    // Calculate grid coordinate from world position
+    const sf::Vector2f gridPosition = convertWorldToGridPosition(worldPosition);
+    const int xCoord = static_cast<int>(std::floor(gridPosition.x));
+    const int yCoord = static_cast<int>(std::floor(gridPosition.y));
+
+    return {xCoord, yCoord};
+}
+
+sf::Vector2f Grid::convertWorldToGridPosition(const sf::Vector2f& worldPosition)
+{
+    // Calculate grid coordinate from world position
+    const float halfSize = m_nodeSize / 2;
+    const float xGridPos = (worldPosition.x - halfSize) / m_nodeSize;
+    const float yGridPos = (worldPosition.y - halfSize) / m_nodeSize;
+
+    return {xGridPos, yGridPos};
 }
 
 void Grid::draw(sf::RenderTarget& target, sf::RenderStates states) const
@@ -71,7 +97,7 @@ void Grid::calculateFlowField(sf::Vector2<int> goalPosition)
 
     for (auto obstacle : m_obstacles)
     {
-        auto node = findNode(obstacle.x, obstacle.y);
+        auto node = findNode(obstacle);
         node->setCost(INT_MAX);
         node->setIntegrationField(INT_MAX);
     }
@@ -100,7 +126,7 @@ void Grid::calculateFlowField(sf::Vector2<int> goalPosition)
         // The direction is already normalised
         sf::Vector2f direction;
         direction = VectorUtils::normalize(lowestIntegrationField->getPosition() - node->getPosition());
-        
+
         /*std::cout << "Lowest: " << lowestIntegrationField->getPosition().x << ", " << lowestIntegrationField->getPosition().y << std::endl;
         std::cout << "Node: " << node->getPosition().x << ", " << node->getPosition().y << std::endl;*/
         //std::cout << direction.x << ", " << direction.y << std::endl;
@@ -110,7 +136,7 @@ void Grid::calculateFlowField(sf::Vector2<int> goalPosition)
 
 void Grid::createCostField(sf::Vector2<int> goalPosition)
 {
-    auto goal = findNode(goalPosition.x, goalPosition.y);
+    auto goal = findNode(goalPosition);
     goal->setCost(0);
 
     std::queue<std::shared_ptr<Node>> leftNodes;
@@ -135,7 +161,7 @@ void Grid::createCostField(sf::Vector2<int> goalPosition)
 
 void Grid::createIntegrationField(const sf::Vector2i goalPosition)
 {
-    const std::shared_ptr<Node> goal = findNode(goalPosition.x, goalPosition.y);
+    const std::shared_ptr<Node> goal = findNode(goalPosition);
     goal->setIntegrationField(0);
 
     std::queue<std::shared_ptr<Node>> leftNodes;
