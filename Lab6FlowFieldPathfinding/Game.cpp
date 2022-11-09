@@ -1,20 +1,25 @@
-﻿#include "Game.hpp"
+#include "Game.hpp"
 
 #include <iostream>
 
 /// <summary>
 /// default constructor
 /// setup the window properties
-/// load and setup the text 
+/// load and setup the text
 /// load and setup the image
 /// </summary>
 Game::Game() :
-    m_window{sf::VideoMode{ScreenSize, ScreenSize, 32U}, "SFML Game"},
-    m_exitGame{false} //when true game will exit
+        m_window{sf::VideoMode{ScreenSize, ScreenSize, 32U}, "SFML Game"},
+        m_exitGame{false} //when true game will exit
 {
     loadFonts();
 
-    m_grid = new Grid(m_fontManager, 50, 50, ScreenSize / 50);
+    constexpr int gridSize = ScreenSize / 60;
+
+    m_grid = new Grid(m_fontManager, gridSize, gridSize, 60, {{5, 10}, {10, 5}});
+    /*m_grid->calculateFlowField(sf::Vector2i(10, 10));*/
+
+    m_agent = new Agent(*m_grid, sf::Vector2f(2 * m_grid->getNodeSize() + 30, 2 * m_grid->getNodeSize() + 30), 50.f, 40.f);
 }
 
 /// <summary>
@@ -24,6 +29,7 @@ Game::Game() :
 Game::~Game()
 {
     delete m_grid;
+    delete m_agent;
 };
 
 
@@ -50,7 +56,6 @@ void Game::run()
             processEvents(); // at least 60 fps
             update(timePerFrame); //60 fps
         }
-
         render(); // as many as possible
     }
 }
@@ -73,8 +78,7 @@ void Game::processEvents()
         {
             processKeys(newEvent);
         }
-
-        if (sf::Event::MouseButtonPressed)
+        if (sf::Event::MouseButtonPressed == newEvent.type)
         {
             processMouse(newEvent);
         }
@@ -86,23 +90,33 @@ void Game::processEvents()
 /// deal with key presses from the user
 /// </summary>
 /// <param name="t_event">key press event</param>
-void Game::processKeys(const sf::Event t_event)
+void Game::processKeys(sf::Event event)
 {
-    if (sf::Keyboard::Escape == t_event.key.code)
+    if (sf::Keyboard::Escape == event.key.code)
     {
         m_exitGame = true;
     }
 }
 
-void Game::processMouse(const sf::Event& t_event) const
+void Game::processMouse(const sf::Event &event) const
 {
-    if (sf::Mouse::Left == t_event.mouseButton.button)
+    if (event.mouseButton.button == sf::Mouse::Left)
     {
-        const sf::Vector2i mousePosition = sf::Vector2i(t_event.mouseButton.x, t_event.mouseButton.y);
-        
+        const sf::Vector2i mousePosition = sf::Vector2i(event.mouseButton.x, event.mouseButton.y);
         // Convert window pixel coordinates to the grid coordinates
-        const sf::Vector2i mouseGridPosition = mousePosition / m_grid->getNodeSize();
-        m_grid->createHeatmap(mouseGridPosition);
+        const sf::Vector2i mouseGridPosition = mousePosition / static_cast<int>(m_grid->getNodeSize());
+
+        m_grid->calculateFlowField(mouseGridPosition);
+    }
+    // Place/remove walls
+    if (event.mouseButton.button == sf::Mouse::Right)
+    {
+        const sf::Vector2i mousePosition = sf::Vector2i(event.mouseButton.x, event.mouseButton.y);
+        // Convert window pixel coordinates to the grid coordinates
+        const sf::Vector2i mouseGridPosition = mousePosition / static_cast<int>(m_grid->getNodeSize());
+
+        m_grid->addObstacle(mouseGridPosition.x, mouseGridPosition.y);
+        m_grid->calculateFlowField(sf::Vector2i(10, 10));
     }
 }
 
@@ -110,9 +124,9 @@ void Game::processMouse(const sf::Event& t_event) const
 /// Update the game world
 /// </summary>
 /// <param name="t_deltaTime">time interval per frame</param>
-void Game::update(sf::Time t_deltaTime)
+void Game::update(sf::Time deltaTime)
 {
-    m_grid->update(t_deltaTime);
+    m_agent->update(deltaTime);
 
     if (m_exitGame)
     {
@@ -128,6 +142,7 @@ void Game::render()
     m_window.clear(sf::Color::Black);
 
     m_window.draw(*m_grid);
+    m_window.draw(*m_agent);
 
     m_window.display();
 }

@@ -91,22 +91,29 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <Content Include="ASSETS\FONTS\ariblk.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Agent.hpp" />
+    <ClInclude Include="Arrow.hpp" />
+    <ClInclude Include="Game.hpp" />
+    <ClInclude Include="Grid.hpp" />
+    <ClInclude Include="Node.hpp" />
+    <ClInclude Include="ResourceManager\ResourceIdentifiers.hpp" />
+    <ClInclude Include="ResourceManager\ResourceManager.hpp" />
+    <ClInclude Include="ResourceManager\ResourceManager.inl" />
+    <ClInclude Include="utils\Math.hpp" />
+    <ClInclude Include="utils\VectorUtils.hpp" />
+    <ClInclude Include="utils\VectorUtils.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Agent.cpp" />
+    <ClCompile Include="Arrow.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Node.cpp" />
-    <ClInclude Include="Direction.hpp" />
-    <ClInclude Include="ResourceManager\ResourceIdentifiers.hpp" />
-    <ClInclude Include="ResourceManager\ResourceManager.inl" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="ASSETS\FONTS\ariblk.ttf" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Game.hpp" />
-    <ClInclude Include="Grid.hpp" />
-    <ClInclude Include="Node.hpp" />
-    <ClInclude Include="ResourceManager\ResourceManager.hpp" />
+    <ClCompile Include="utils\Math.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

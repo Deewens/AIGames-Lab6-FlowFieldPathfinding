@@ -1,17 +1,20 @@
-﻿#ifndef GAME_HPP
+#ifndef GAME_HPP
 #define GAME_HPP
+
+#include <memory>
 
 #include <SFML/Graphics.hpp>
 
-#include "Grid.hpp"
-
 #include "ResourceManager/ResourceManager.hpp"
 #include "ResourceManager/ResourceIdentifiers.hpp"
+#include "Grid.hpp"
+#include "Agent.hpp"
 
-class Game // NOLINT(cppcoreguidelines-special-member-functions)
+class Game
 {
 public:
     Game();
+
     ~Game();
 
     /// <summary>
@@ -20,23 +23,30 @@ public:
     void run();
 
 private:
+
     void processEvents();
-    void processKeys(sf::Event t_event);
-    void processMouse(const sf::Event& t_event) const;
-    void update(sf::Time t_deltaTime);
+
+    void processKeys(sf::Event event);
+
+    void processMouse(const sf::Event &event) const;
+
+    void update(sf::Time deltaTime);
+
     void render();
 
     void loadFonts();
 
-    unsigned int static constexpr ScreenSize = 1200U;
+    unsigned int static constexpr ScreenSize = 840U;
 
     sf::RenderWindow m_window; // main SFML window
-
-    FontManager m_fontManager;
+    bool m_exitGame; // control exiting game
 
     Grid* m_grid;
 
-    bool m_exitGame; // control exiting game
+    Agent* m_agent;
+
+    FontManager m_fontManager;
+
 };
 
 #endif // !GAME_HPP

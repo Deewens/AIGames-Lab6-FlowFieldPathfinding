@@ -1,28 +1,51 @@
-﻿#include "Node.hpp"
+#include "Node.hpp"
 
-#include <ostream>
 #include <iostream>
 
-#include <SFML/Graphics/RenderTarget.hpp>
+#include "Grid.hpp"
 
-#include "Direction.hpp"
-
-Node::Node(const FontManager& fontManager, const int x, const int y, const int& nodeSize,
-           std::vector<Node>& gridNodes) :
-    m_x(x), m_y(y), m_nodeSize(nodeSize),
-    m_cost(1),
+Node::Node(const FontManager& fontManager, Grid& grid, sf::Vector2i localCoordinate, float size) :
+    m_size(size),
+    m_localPosition(localCoordinate),
+    m_grid(grid),
+    m_cost(-1),
+    m_integrationField(-1),
     m_vertices(sf::Quads, 4),
-    m_outlineVertices(sf::Lines, 8),
-    m_nodes(gridNodes)
+    m_outlineVertices(sf::Lines, 8)
 {
-    m_costText.setString(std::to_string(m_cost));
-    m_costText.setFont(fontManager.get(Assets::Font::ArialBlack));
+    const float halfSize = m_size / 2;
+    // Offset from border of window because the origin point of each node is centered
+    const float gridOffset = halfSize / 2;
 
-    m_costText.setPosition(static_cast<float>(x * m_nodeSize), static_cast<float>(y * m_nodeSize));
-    m_costText.setCharacterSize(10);
+    setPosition(static_cast<float>(localCoordinate.x) * m_size + halfSize,
+                static_cast<float>(localCoordinate.y) * m_size + halfSize);
+
+    // Origin is at the center of each node
+    setOrigin(halfSize, halfSize);
+
+    setupDebugText(fontManager);
 
     createQuadVertices();
     createOutlineVertices();
+
+    m_positionPoint.setRadius(2);
+    m_positionPoint.setFillColor(sf::Color::Red);
+    m_positionPoint.setOrigin(m_positionPoint.getRadius(), m_positionPoint.getRadius());
+    m_positionPoint.setPosition(getPosition());
+
+    //std::cout << getPosition().x << " " << getPosition().y << std::endl;
+    m_arrow.setPosition(getPosition());
+    m_arrow.setLength(halfSize);
+}
+
+sf::Vector2i Node::getLocalCoordinates() const
+{
+    return m_localPosition;
+}
+
+sf::Vector2f Node::getLocalOrigin() const
+{
+    return {static_cast<float>(m_localPosition.x) + 0.5f, static_cast<float>(m_localPosition.y) + 0.5f};
 }
 
 int Node::getCost() const
@@ -35,53 +58,32 @@ void Node::setCost(const int cost)
     m_cost = cost;
 
     m_costText.setString(std::to_string(m_cost));
-
     updateQuadColor();
 }
 
-const sf::Text& Node::getCostText() const
+int Node::getIntegrationField() const
 {
-    return m_costText;
+    return m_integrationField;
 }
 
-sf::Vector2i Node::getPosition() const
+void Node::setIntegrationField(const int integrationField)
 {
-    return {m_x, m_y};
+    m_integrationField = integrationField;
+
+    m_integrationFieldText.setString(std::to_string(m_integrationField));
 }
 
-int Node::getX() const
+sf::Vector2f Node::getFlowFieldDirection() const
 {
-    return m_x;
+    return m_flowFieldDirection;
 }
 
-int Node::getY() const
+void Node::setFlowFieldDirection(const sf::Vector2f fieldDirection)
 {
-    return m_y;
+    m_flowFieldDirection = fieldDirection;
+
+    m_arrow.setDirection(sf::Vector2f(fieldDirection));
 }
-
-std::vector<Node> Node::getNeighbours()
-{
-    auto northPosition = getPosition() + sf::Vector2i(0, 1);
-    auto eastPosition = getPosition() + sf::Vector2i(1, 0);
-    auto southPosition = getPosition() + sf::Vector2i(0, -1);
-    auto westPosition = getPosition() + sf::Vector2i(-1, 0);
-
-    auto northEastPosition = getPosition() + sf::Vector2i(1, 1);
-    auto southEastPosition = getPosition() + sf::Vector2i(1, -1);
-    auto southWestPosition = getPosition() + sf::Vector2i(-1, -1);
-    auto northWestPosition = getPosition() + sf::Vector2i(-1, 1);
-
-    for (auto element : Direction::CardinalDirections<int>)
-    {
-        
-    }
-    
-    auto found = std::find_if(m_nodes.begin(), m_nodes.end(), [=](Node& node)
-    {
-        return 
-    });
-}
-
 
 void Node::setQuadColor(sf::Color color)
 {
@@ -97,6 +99,10 @@ void Node::updateQuadColor()
     {
         setQuadColor(sf::Color::Red);
     }
+    else if (m_cost == INT_MAX)
+    {
+        setQuadColor(sf::Color::Magenta);
+    }
     else
     {
         const auto heatmapColor = static_cast<sf::Uint8>((50 - m_cost) * 255 / 50);
@@ -105,13 +111,17 @@ void Node::updateQuadColor()
     }
 }
 
-
 void Node::createQuadVertices()
 {
-    m_vertices[0].position = static_cast<sf::Vector2f>(sf::Vector2i(m_x * m_nodeSize, m_y * m_nodeSize));
-    m_vertices[1].position = static_cast<sf::Vector2f>(sf::Vector2i((m_x + 1) * m_nodeSize, m_y * m_nodeSize));
-    m_vertices[2].position = static_cast<sf::Vector2f>(sf::Vector2i((m_x + 1) * m_nodeSize, (m_y + 1) * m_nodeSize));
-    m_vertices[3].position = static_cast<sf::Vector2f>(sf::Vector2i(m_x * m_nodeSize, (m_y + 1) * m_nodeSize));
+    const auto x = getPosition().x;
+    const auto y = getPosition().y;
+
+    const float halfSize = m_size / 2;
+
+    m_vertices[0].position = sf::Vector2f(x - halfSize, y - halfSize);
+    m_vertices[1].position = sf::Vector2f(x + halfSize, y - halfSize);
+    m_vertices[2].position = sf::Vector2f(x + halfSize, y + halfSize);
+    m_vertices[3].position = sf::Vector2f(x - halfSize, y + halfSize);
 
     // Color the individual quad of the heatmap according to the cost (cost 0 = light bue, cost 255 = black)
     // Inversion of the cost to conform to a [0, 255] range (eg: 0 cost = black = 255 in term of color, so we invert 0 to be 255)
@@ -130,19 +140,30 @@ void Node::createQuadVertices()
 
 void Node::createOutlineVertices()
 {
-    m_outlineVertices[0].position = static_cast<sf::Vector2f>(sf::Vector2i(m_x * m_nodeSize, m_y * m_nodeSize));
-    m_outlineVertices[1].position = static_cast<sf::Vector2f>(sf::Vector2i((m_x + 1) * m_nodeSize, m_y * m_nodeSize));
+    const float halfSize = m_size / 2;
+    const auto x = getLocalCoordinates().x;
+    const auto y = getLocalCoordinates().y;
 
-    m_outlineVertices[2].position = static_cast<sf::Vector2f>(sf::Vector2i((m_x + 1) * m_nodeSize, m_y * m_nodeSize));
-    m_outlineVertices[3].position = static_cast<sf::Vector2f>(sf::Vector2i(
-        (m_x + 1) * m_nodeSize, (m_y + 1) * m_nodeSize));
 
-    m_outlineVertices[4].position = static_cast<sf::Vector2f>(sf::Vector2i(
-        (m_x + 1) * m_nodeSize, (m_y + 1) * m_nodeSize));
-    m_outlineVertices[5].position = static_cast<sf::Vector2f>(sf::Vector2i(m_x * m_nodeSize, (m_y + 1) * m_nodeSize));
+    m_outlineVertices[0].position = sf::Vector2f(
+        x * m_grid.getNodeSize(), y * m_grid.getNodeSize());
+    m_outlineVertices[1].position = sf::Vector2f(
+        (x + 1) * m_grid.getNodeSize(), y * m_grid.getNodeSize());
 
-    m_outlineVertices[6].position = static_cast<sf::Vector2f>(sf::Vector2i(m_x * m_nodeSize, (m_y + 1) * m_nodeSize));
-    m_outlineVertices[7].position = static_cast<sf::Vector2f>(sf::Vector2i(m_x * m_nodeSize, m_y * m_nodeSize));
+    m_outlineVertices[2].position = sf::Vector2f(
+        (x + 1) * m_grid.getNodeSize(), y * m_grid.getNodeSize());
+    m_outlineVertices[3].position = sf::Vector2f(
+        (x + 1) * m_grid.getNodeSize(), (y + 1) * m_grid.getNodeSize());
+
+    m_outlineVertices[4].position = sf::Vector2f(
+        (x + 1) * m_grid.getNodeSize(), (y + 1) * m_grid.getNodeSize());
+    m_outlineVertices[5].position = sf::Vector2f(
+        x * m_grid.getNodeSize(), (y + 1) * m_grid.getNodeSize());
+
+    m_outlineVertices[6].position = sf::Vector2f(
+        x * m_grid.getNodeSize(), (y + 1) * m_grid.getNodeSize());
+    m_outlineVertices[7].position = sf::Vector2f(
+        x * m_grid.getNodeSize(), y * m_grid.getNodeSize());
 
     for (size_t i = 0; i < m_outlineVertices.getVertexCount(); i++)
     {
@@ -152,6 +173,59 @@ void Node::createOutlineVertices()
 
 void Node::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
-    target.draw(m_vertices);
+    states.transform *= getTransform();
+
+    target.draw(m_vertices, states);
     target.draw(m_outlineVertices);
+    //if (m_cost != INT_MAX) target.draw(m_costText, states);
+    //target.draw(m_integrationFieldText, states);
+
+    if (m_flowFieldDirection != sf::Vector2f(0, 0)) target.draw(m_arrow, states);
+
+    target.draw(m_positionPoint);
+}
+
+void Node::setupDebugText(const FontManager& fontManager)
+{
+    m_costText.setString(std::to_string(m_cost));
+    m_costText.setFont(fontManager.get(Assets::Font::ArialBlack));
+    m_costText.setPosition(getPosition());
+    m_costText.setCharacterSize(15);
+
+    m_integrationFieldText.setFont(fontManager.get(Assets::Font::ArialBlack));
+    m_integrationFieldText.setCharacterSize(15);
+    m_integrationFieldText.setPosition(getPosition().x + m_size - 30,
+                                       getPosition().y);
+}
+
+std::vector<std::shared_ptr<Node>> Node::getNeighbours(bool includeDiagonals) const
+{
+    std::vector<std::shared_ptr<Node>> neighbours;
+
+    // Loop through the 8 directions to find the neighbours of a rectangular cell
+    for (int direction = 0; direction < 9; direction++)
+    {
+        // Skip 4, this is ourself
+        if (direction == 4) continue;
+
+        if (!includeDiagonals)
+        {
+            if (direction == 0 || direction == 2 || direction == 6 || direction == 8) continue;
+        }
+
+        const int neighbourX = m_localPosition.x + ((direction % 3) - 1);
+        const int neighbourY = m_localPosition.y + ((direction / 3) - 1);
+
+        if (neighbourX < 0 || neighbourX > m_grid.getWidth() - 1 ||
+            neighbourY < 0 || neighbourY > m_grid.getHeight() - 1)
+        {
+            continue;
+        }
+
+        // Calculate the node cell in the list
+        auto neighbour = m_grid.findNode(neighbourX, neighbourY);
+        neighbours.push_back(neighbour);
+    }
+
+    return neighbours;
 }

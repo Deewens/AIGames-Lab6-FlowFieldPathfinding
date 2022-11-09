@@ -1,58 +1,82 @@
-﻿#pragma once
+#ifndef LAB6FLOWFIELD_NODE_HPP
+#define LAB6FLOWFIELD_NODE_HPP
 
-#include <SFML/Graphics/Text.hpp>
+#include <SFML/Graphics.hpp>
+
+#include "Arrow.hpp"
 
 #include "ResourceManager/ResourceManager.hpp"
 #include "ResourceManager/ResourceIdentifiers.hpp"
 
-class Node : public sf::Drawable
+class Grid;
+
+class Node : public sf::Drawable, public sf::Transformable
 {
-private:
-    int m_x = 0, m_y = 0;
-    int m_nodeSize;
-
-    int m_cost;
-
-    sf::Text m_costText;
-
-    sf::VertexArray m_vertices;
-    sf::VertexArray m_outlineVertices;
-
-    // Reference to the list of all the nodes in the grid
-    std::vector<Node>& m_nodes;
 public:
-    Node(const FontManager& fontManager, int x, int y, const int& nodeSize, std::vector<Node>& gridNodes);
+    Node(const FontManager& fontManager, Grid& grid, sf::Vector2i localCoordinate, float size);
+
+    /**
+    * \brief Local position of the node in grid coordinate
+    * \return (X, Y) vector local position of the node
+    */
+    sf::Vector2i getLocalCoordinates() const;
+
+    /**
+     * \brief Get local center position in grid coordinate
+     * \return Center point of the node
+     */
+    sf::Vector2f getLocalOrigin() const;
 
     int getCost() const;
+
     void setCost(int cost);
 
-    const sf::Text& getCostText() const;
+    int getIntegrationField() const;
 
-    sf::Vector2i getPosition() const;
-    int getX() const;
-    int getY() const;
+    void setIntegrationField(int integrationField);
 
-    std::vector<Node> getNeighbours();
-    
+    sf::Vector2f getFlowFieldDirection() const;
+
+    void setFlowFieldDirection(sf::Vector2f fieldDirection);
+
+    std::vector<std::shared_ptr<Node>> getNeighbours(bool includeDiagonals = true) const;
+
+private:
     void setQuadColor(sf::Color color);
 
     void updateQuadColor();
 
     void createQuadVertices();
+
     void createOutlineVertices();
 
+    void setupDebugText(const FontManager& fontManager);
 
-    friend bool operator==(const Node& t_lhs, const Node& t_rhs)
-    {
-        return t_lhs.m_x == t_rhs.m_x
-            && t_lhs.m_y == t_rhs.m_y;
-    }
-
-    friend bool operator!=(const Node& t_lhs, const Node& t_rhs)
-    {
-        return !(t_lhs == t_rhs);
-    }
-
-private:
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+
+    sf::CircleShape m_positionPoint;
+    
+    float m_size;
+
+    // Local coordinate of the node in the grid
+    sf::Vector2i m_localPosition;
+
+    Grid& m_grid;
+
+    int m_cost;
+    int m_integrationField;
+
+    // Store the direction of the flow in the direction of the goal
+    // (also called vector field)
+    sf::Vector2f m_flowFieldDirection;
+    Arrow m_arrow;
+
+    sf::Text m_costText;
+    sf::Text m_integrationFieldText;
+
+    sf::VertexArray m_vertices;
+    sf::VertexArray m_outlineVertices;
 };
+
+
+#endif //LAB6FLOWFIELD_NODE_HPP

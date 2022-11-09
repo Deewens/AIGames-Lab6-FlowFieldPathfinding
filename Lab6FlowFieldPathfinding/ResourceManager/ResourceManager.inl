@@ -1,6 +1,4 @@
-﻿// ReSharper disable once CppMissingIncludeGuard
-
-template <typename Resource, typename Identifier>
+﻿template <typename Resource, typename Identifier>
 void ResourceManager<Resource, Identifier>::load(Identifier id, const std::string& filename)
 {
     // Create and load resource

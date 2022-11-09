@@ -10,7 +10,7 @@ namespace Assets
 {
     enum class Font
     {
-        ArialBlack,
+        ArialBlack
     };
 }
 
