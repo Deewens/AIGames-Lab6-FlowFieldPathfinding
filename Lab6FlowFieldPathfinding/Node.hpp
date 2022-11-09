@@ -13,19 +13,7 @@ class Grid;
 class Node : public sf::Drawable, public sf::Transformable
 {
 public:
-    Node(const FontManager& fontManager, Grid& grid, sf::Vector2i localCoordinate, float size);
-
-    /**
-    * \brief Local position of the node in grid coordinate
-    * \return (X, Y) vector local position of the node
-    */
-    sf::Vector2i getLocalCoordinates() const;
-
-    /**
-     * \brief Get local center position in grid coordinate
-     * \return Center point of the node
-     */
-    sf::Vector2f getLocalOrigin() const;
+    Node(const FontManager& fontManager, Grid& grid, sf::Vector2i coordinates, float size);
 
     int getCost() const;
 
@@ -58,8 +46,8 @@ private:
     
     float m_size;
 
-    // Local coordinate of the node in the grid
-    sf::Vector2i m_localPosition;
+    // (X,Y) coordinates of the node in the grid
+    sf::Vector2i m_coordinates;
 
     Grid& m_grid;
 
