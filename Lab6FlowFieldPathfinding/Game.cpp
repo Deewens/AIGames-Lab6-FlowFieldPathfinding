@@ -19,7 +19,7 @@ Game::Game() :
     m_grid = new Grid(m_fontManager, gridSize, gridSize, 60, {{5, 10}, {10, 5}});
     /*m_grid->calculateFlowField(sf::Vector2i(10, 10));*/
 
-    m_agent = new Agent(*m_grid, m_grid->findNode({2, 2})->getPosition(), 60.f, 100.f);
+    m_agent = new Agent(*m_grid, m_grid->findNode({2, 2})->getPosition(), 80.f, 200.f);
 }
 
 /// <summary>

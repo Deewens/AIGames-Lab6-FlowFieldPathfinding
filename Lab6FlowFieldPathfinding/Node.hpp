@@ -15,9 +15,9 @@ class Node : public sf::Drawable, public sf::Transformable
 public:
     Node(const FontManager& fontManager, Grid& grid, sf::Vector2i coordinates, float size);
 
-    int getCost() const;
+    int getCostDistance() const;
 
-    void setCost(int cost);
+    void setCostDistance(int cost);
 
     int getIntegrationField() const;
 
@@ -52,7 +52,7 @@ private:
 
     Grid& m_grid;
 
-    int m_cost;
+    int m_costDistance;
     int m_integrationField;
 
     // Store the direction of the flow in the direction of the goal

@@ -78,7 +78,7 @@ void Agent::draw(sf::RenderTarget& target, sf::RenderStates states) const
 sf::Vector2f Agent::steeringBehaviourFlowField()
 {
     const sf::Vector2i nodeCoords = m_grid.convertWorldToGridCoordinates(getPosition());
-    std::cout << "\rGrid coords: " << nodeCoords.x << " " << nodeCoords.y << "\tAgent pos: " << getPosition().x << " " << getPosition().y << std::flush;
+    //std::cout << "\rGrid coords: " << nodeCoords.x << " " << nodeCoords.y << "\tAgent pos: " << getPosition().x << " " << getPosition().y << std::flush;
 
     sf::Vector2f f00;
     sf::Vector2f f01;

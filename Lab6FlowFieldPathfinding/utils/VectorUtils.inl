@@ -6,7 +6,7 @@
 template <class T>
 float VectorUtils::getLength(sf::Vector2<T> v)
 {
-    return std::sqrtf(v.x * v.x + v.y * v.y);
+    return std::sqrt(v.x * v.x + v.y * v.y);
 }
 
 template <class T>

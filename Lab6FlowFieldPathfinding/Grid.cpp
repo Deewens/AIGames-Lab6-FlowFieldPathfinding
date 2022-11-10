@@ -115,7 +115,7 @@ void Grid::calculateFlowField()
     // Refresh
     for (const auto& node : m_nodes)
     {
-        node->setCost(-1);
+        node->setCostDistance(-1);
         node->setIntegrationField(-1);
         node->setFlowFieldDirection({0, 0});
     }
@@ -123,7 +123,7 @@ void Grid::calculateFlowField()
     for (auto obstacle : m_obstacles)
     {
         auto node = findNode(obstacle);
-        node->setCost(INT_MAX);
+        node->setCostDistance(INT_MAX);
         node->setIntegrationField(INT_MAX);
     }
 
@@ -132,7 +132,32 @@ void Grid::calculateFlowField()
 
     for (const auto& node : m_nodes)
     {
-        if (node->getCost() == INT_MAX)
+        if (node->getCostDistance() == INT_MAX) continue;
+        const auto neighbours = node->getNeighbours();
+        
+        std::shared_ptr<Node> lowestDistance = nullptr;
+        for (size_t i = 0; i < neighbours.size(); i++)
+        {
+            if (neighbours[i]->getCostDistance() == INT_MAX) continue;
+            if (lowestDistance == nullptr)
+            {
+                lowestDistance = neighbours[i];
+                continue;
+            }
+            
+            if (neighbours[i]->getIntegrationField() < lowestDistance->getIntegrationField())
+            {
+                lowestDistance = neighbours[i];
+            }
+        }
+
+        const auto directionToClosestNeighbour = VectorUtils::normalize(lowestDistance->getPosition() - node->getPosition());
+        if (node->getCostDistance() != 0) node->setFlowFieldDirection(directionToClosestNeighbour);
+    }
+
+    /*for (const auto& node : m_nodes)
+    {
+        if (node->getCostDistance() == INT_MAX)
         {
             continue;
         }
@@ -153,32 +178,32 @@ void Grid::calculateFlowField()
         direction = VectorUtils::normalize(lowestIntegrationField->getPosition() - node->getPosition());
 
         /*std::cout << "Lowest: " << lowestIntegrationField->getPosition().x << ", " << lowestIntegrationField->getPosition().y << std::endl;
-        std::cout << "Node: " << node->getPosition().x << ", " << node->getPosition().y << std::endl;*/
+        std::cout << "Node: " << node->getPosition().x << ", " << node->getPosition().y << std::endl;
         //std::cout << direction.x << ", " << direction.y << std::endl;
-        if (node->getCost() != 0) node->setFlowFieldDirection(direction);
-    }
+        if (node->getCostDistance() != 0) node->setFlowFieldDirection(direction);
+    }*/
 }
 
 void Grid::createCostField()
 {
     auto goal = findNode(m_goalCoordinates);
-    goal->setCost(0);
+    goal->setCostDistance(0);
 
-    std::queue<std::shared_ptr<Node>> leftNodes;
-    leftNodes.push(goal);
+    std::queue<std::shared_ptr<Node>> unmarkedNodes;
+    unmarkedNodes.push(goal);
 
-    while (!leftNodes.empty())
+    while (!unmarkedNodes.empty())
     {
-        const auto current = leftNodes.front();
-        leftNodes.pop();
+        const auto current = unmarkedNodes.front();
+        unmarkedNodes.pop();
 
         auto neighbours = current->getNeighbours(true);
         for (auto& neighbour : neighbours)
         {
-            if (neighbour->getCost() == -1)
+            if (neighbour->getCostDistance() == -1)
             {
-                neighbour->setCost(current->getCost() + 1);
-                leftNodes.push(neighbour);
+                neighbour->setCostDistance(current->getCostDistance() + 1);
+                unmarkedNodes.push(neighbour);
             }
         }
     }
@@ -189,29 +214,38 @@ void Grid::createIntegrationField()
     const std::shared_ptr<Node> goal = findNode(m_goalCoordinates);
     goal->setIntegrationField(0);
 
-    std::queue<std::shared_ptr<Node>> leftNodes;
-    leftNodes.push(goal);
+    std::queue<std::shared_ptr<Node>> unmarkedNodes;
+    unmarkedNodes.push(goal);
 
-    while (!leftNodes.empty())
+    while (!unmarkedNodes.empty())
     {
-        const auto current = leftNodes.front();
-        leftNodes.pop();
+        const auto current = unmarkedNodes.front();
+        unmarkedNodes.pop();
 
-        if (current->getCost() == INT_MAX) continue;
+        //if (current->getCostDistance() == INT_MAX) continue;
 
         auto neighbours = current->getNeighbours();
         for (auto& neighbour : neighbours)
         {
-            if (neighbour->getCost() == INT_MAX) continue;
+            //if (neighbour->getCostDistance() == INT_MAX) continue;
 
-            if (neighbour->getIntegrationField() == -1)
+            /*if (neighbour->getIntegrationField() == -1)
             {
-                leftNodes.push(neighbour);
+                unmarkedNodes.push(neighbour);
 
                 const int distance = std::max(std::abs(neighbour->getPosition().x - goal->getPosition().x),
                                               std::abs(neighbour->getPosition().y - goal->getPosition().y));
 
-                neighbour->setIntegrationField(neighbour->getCost() + distance);
+                neighbour->setIntegrationField(neighbour->getCostDistance() + distance);
+            }*/
+
+            if (neighbour->getIntegrationField() == -1 && neighbour->getIntegrationField() != INT_MAX)
+            {
+                const int distance =
+                    VectorUtils::getLength(neighbour->getPosition() - goal->getPosition());
+                neighbour->setIntegrationField(current->getCostDistance() + distance);
+                std::cout << distance << std::endl;
+                unmarkedNodes.push(neighbour);
             }
         }
     }

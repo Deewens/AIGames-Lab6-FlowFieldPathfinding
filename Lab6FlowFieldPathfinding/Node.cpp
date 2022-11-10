@@ -8,7 +8,7 @@ Node::Node(const FontManager& fontManager, Grid& grid, sf::Vector2i coordinates,
     m_size(size),
     m_coordinates(coordinates),
     m_grid(grid),
-    m_cost(-1),
+    m_costDistance(-1),
     m_integrationField(-1),
     m_vertices(sf::Quads, 4),
     m_outlineVertices(sf::Lines, 4)
@@ -35,16 +35,16 @@ Node::Node(const FontManager& fontManager, Grid& grid, sf::Vector2i coordinates,
     m_arrow.setLength(halfSize);
 }
 
-int Node::getCost() const
+int Node::getCostDistance() const
 {
-    return m_cost;
+    return m_costDistance;
 }
 
-void Node::setCost(const int cost)
+void Node::setCostDistance(const int cost)
 {
-    m_cost = cost;
+    m_costDistance = cost;
 
-    m_costText.setString(std::to_string(m_cost));
+    m_costText.setString(std::to_string(m_costDistance));
     updateQuadColor();
 }
 
@@ -82,17 +82,17 @@ void Node::setQuadColor(sf::Color color)
 
 void Node::updateQuadColor()
 {
-    if (m_cost == 0)
+    if (m_costDistance == 0)
     {
         setQuadColor(sf::Color::Red);
     }
-    else if (m_cost == m_grid.getWidth() + m_grid.getHeight())
+    else if (m_costDistance == INT_MAX)
     {
         setQuadColor(sf::Color::Magenta);
     }
     else
     {
-        const auto heatmapColor = static_cast<sf::Uint8>((50 - m_cost) * 255 / 50);
+        const auto heatmapColor = static_cast<sf::Uint8>((50 - m_costDistance) * 255 / 50);
 
         setQuadColor(sf::Color(0, 0, heatmapColor));
     }
@@ -109,7 +109,7 @@ void Node::createQuadVertices()
     // Inversion of the cost to conform to a [0, 255] range (eg: 0 cost = black = 255 in term of color, so we invert 0 to be 255)
     //const auto heatmapColor = static_cast<sf::Uint8>((50 - m_cost) * 255 / 50);
     const int maxCost = (m_grid.getWidth() - 1) + (m_grid.getHeight() - 1);
-    const auto heatmapColor = static_cast<sf::Uint8>((maxCost - m_cost) * 255 / maxCost);
+    const auto heatmapColor = static_cast<sf::Uint8>((maxCost - m_costDistance) * 255 / maxCost);
 
     // TODO: To set the color value of the heatmap, take the maximum cost value possible on the graph, and then, for each cost, calculate the rule of three
     // TODO: (MaxCost - cost) * 255 / MaxCost
@@ -151,7 +151,7 @@ void Node::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
     target.draw(m_vertices, states);
     target.draw(m_outlineVertices, states);
-    if (m_cost != INT_MAX) target.draw(m_costText, states);
+    if (m_costDistance != INT_MAX) target.draw(m_costText, states);
     target.draw(m_integrationFieldText, states);
 
     if (m_flowFieldDirection != sf::Vector2f(0, 0)) target.draw(m_arrow, states);
@@ -161,7 +161,7 @@ void Node::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
 void Node::setupDebugText(const FontManager& fontManager)
 {
-    m_costText.setString(std::to_string(m_cost));
+    m_costText.setString(std::to_string(m_costDistance));
     m_costText.setFont(fontManager.get(Assets::Font::ArialBlack));
     m_costText.setPosition(0, 0);
     m_costText.setCharacterSize(15);
