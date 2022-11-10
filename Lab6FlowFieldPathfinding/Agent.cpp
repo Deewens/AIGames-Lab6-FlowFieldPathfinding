@@ -42,6 +42,16 @@ void Agent::setRotation(float newRotation)
     m_shape.setRotation(newRotation);
 }
 
+float Agent::getRadius()
+{
+    return m_shape.getRadius();
+}
+
+float Agent::getOutlineThickness()
+{
+    return m_shape.getOutlineThickness();
+}
+
 
 void Agent::update(const sf::Time dt)
 {
@@ -68,11 +78,53 @@ void Agent::draw(sf::RenderTarget& target, sf::RenderStates states) const
 sf::Vector2f Agent::steeringBehaviourFlowField()
 {
     const sf::Vector2i nodeCoords = m_grid.convertWorldToGridCoordinates(getPosition());
+    std::cout << "\rGrid coords: " << nodeCoords.x << " " << nodeCoords.y << "\tAgent pos: " << getPosition().x << " " << getPosition().y << std::flush;
 
-    const auto f00 = sf::Vector2f(m_grid.findNode({nodeCoords.x, nodeCoords.y})->getFlowFieldDirection());
-    const auto f01 = sf::Vector2f(m_grid.findNode({nodeCoords.x, nodeCoords.y + 1})->getFlowFieldDirection());
-    const auto f10 = sf::Vector2f(m_grid.findNode({nodeCoords.x + 1, nodeCoords.y})->getFlowFieldDirection());
-    const auto f11 = sf::Vector2f(m_grid.findNode({nodeCoords.x + 1, nodeCoords.y + 1})->getFlowFieldDirection());
+    sf::Vector2f f00;
+    sf::Vector2f f01;
+    sf::Vector2f f10;
+    sf::Vector2f f11;
+    
+    const auto node00 = m_grid.findNode({nodeCoords.x, nodeCoords.y});
+    const auto node01 = m_grid.findNode({nodeCoords.x, nodeCoords.y + 1});
+    const auto node10 = m_grid.findNode({nodeCoords.x + 1, nodeCoords.y});
+    const auto node11 = m_grid.findNode({nodeCoords.x + 1, nodeCoords.y + 1});
+    if (node00 != nullptr)
+    {
+        f00 = sf::Vector2f(node00->getFlowFieldDirection());
+    }
+    else
+    {
+        // Return no velocity because the agent is not on a node parts of the grid
+        return {0, 0};
+    }
+    
+    if (node01 != nullptr)
+    {
+        f01 = sf::Vector2f(node01->getFlowFieldDirection());
+    }
+    else
+    {
+        f01 = sf::Vector2f(0, -1);
+    }
+    if (node10 != nullptr)
+    {
+        f10 = sf::Vector2f(node10->getFlowFieldDirection());
+    }
+    else
+    {
+        f10 = sf::Vector2f(-1, 0);
+    }
+    
+    if (node11 != nullptr)
+    {
+        f11 = sf::Vector2f(node11->getFlowFieldDirection());
+    }
+    else
+    {
+        f11 = sf::Vector2f(1, 1);
+
+    }
 
     const sf::Vector2f nodeGridPos = m_grid.convertWorldToGridPosition(getPosition());
 
@@ -83,7 +135,13 @@ sf::Vector2f Agent::steeringBehaviourFlowField()
 
     const auto yWeight = nodeGridPos.y - static_cast<float>(nodeCoords.y);
 
-    const auto direction = VectorUtils::normalize((top * (1 - yWeight)) + (bottom * yWeight));
+    auto direction = VectorUtils::normalize((top * (1 - yWeight)) + (bottom * yWeight));
+        /*
+    if (m_grid.findNode({nodeCoords.x, nodeCoords.y + 1}) == nullptr)
+    {
+        direction = sf::Vector2f(0, -1);
+    }*/
+    //std::cout << "\r" << direction.x << " " << direction.y << "                ";
 
     if (std::isnan(VectorUtils::getLength(direction)))
     {

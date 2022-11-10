@@ -86,7 +86,7 @@ void Node::updateQuadColor()
     {
         setQuadColor(sf::Color::Red);
     }
-    else if (m_cost == INT_MAX)
+    else if (m_cost == m_grid.getWidth() + m_grid.getHeight())
     {
         setQuadColor(sf::Color::Magenta);
     }
@@ -107,7 +107,9 @@ void Node::createQuadVertices()
 
     // Color the individual quad of the heatmap according to the cost (cost 0 = light bue, cost 255 = black)
     // Inversion of the cost to conform to a [0, 255] range (eg: 0 cost = black = 255 in term of color, so we invert 0 to be 255)
-    const auto heatmapColor = static_cast<sf::Uint8>((50 - m_cost) * 255 / 50);
+    //const auto heatmapColor = static_cast<sf::Uint8>((50 - m_cost) * 255 / 50);
+    const int maxCost = (m_grid.getWidth() - 1) + (m_grid.getHeight() - 1);
+    const auto heatmapColor = static_cast<sf::Uint8>((maxCost - m_cost) * 255 / maxCost);
 
     // TODO: To set the color value of the heatmap, take the maximum cost value possible on the graph, and then, for each cost, calculate the rule of three
     // TODO: (MaxCost - cost) * 255 / MaxCost

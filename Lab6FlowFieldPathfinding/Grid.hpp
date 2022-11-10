@@ -23,7 +23,10 @@ public:
 
     float getNodeSize() const;
 
-    void calculateFlowField(sf::Vector2<int> goalPosition);
+    void calculateFlowField();
+    
+    void setGoalCoordinates(sf::Vector2i goalCoordinates);
+    sf::Vector2i getGoalCoordinates();
 
     std::shared_ptr<Node> findNode(const sf::Vector2i& coordinates);
     
@@ -36,6 +39,10 @@ public:
     void removeObstacle(int x, int y);
 
 private:
+    void createCostField();
+
+    void createIntegrationField();
+    
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 
     std::vector<std::shared_ptr<Node>> m_nodes;
@@ -47,11 +54,9 @@ private:
 
     float m_nodeSize;
 
+    sf::Vector2i m_goalCoordinates;
+    
     std::list<sf::Vector2i> m_obstacles;
-
-    void createCostField(sf::Vector2<int> goalPosition);
-
-    void createIntegrationField(sf::Vector2i goalPosition);
 };
 
 

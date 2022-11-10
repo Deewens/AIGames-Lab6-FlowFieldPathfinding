@@ -21,6 +21,10 @@ public:
 
     void setRotation(float newRotation);
 
+    float getRadius();
+
+    float getOutlineThickness();
+    
     void update(sf::Time dt);
 
 private:

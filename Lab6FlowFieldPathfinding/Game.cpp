@@ -19,7 +19,7 @@ Game::Game() :
     m_grid = new Grid(m_fontManager, gridSize, gridSize, 60, {{5, 10}, {10, 5}});
     /*m_grid->calculateFlowField(sf::Vector2i(10, 10));*/
 
-    m_agent = new Agent(*m_grid, m_grid->findNode({2, 2})->getPosition(), 50.f, 40.f);
+    m_agent = new Agent(*m_grid, m_grid->findNode({2, 2})->getPosition(), 60.f, 70.f);
 }
 
 /// <summary>
@@ -106,7 +106,8 @@ void Game::processMouse(const sf::Event &event) const
         // Convert window pixel coordinates to the grid coordinates
         const sf::Vector2i mouseGridPosition = mousePosition / static_cast<int>(m_grid->getNodeSize());
 
-        m_grid->calculateFlowField(mouseGridPosition);
+        m_grid->setGoalCoordinates(mouseGridPosition);
+        m_grid->calculateFlowField();
     }
     // Place/remove walls
     if (event.mouseButton.button == sf::Mouse::Right)
@@ -116,16 +117,41 @@ void Game::processMouse(const sf::Event &event) const
         const sf::Vector2i mouseGridPosition = mousePosition / static_cast<int>(m_grid->getNodeSize());
 
         m_grid->addObstacle(mouseGridPosition.x, mouseGridPosition.y);
-        m_grid->calculateFlowField(sf::Vector2i(10, 10));
+        m_grid->calculateFlowField();
     }
 }
 
 /// <summary>
 /// Update the game world
 /// </summary>
-/// <param name="t_deltaTime">time interval per frame</param>
+/// <param name="deltaTime">time interval per frame</param>
 void Game::update(sf::Time deltaTime)
 {
+    if (m_agent->getPosition().x - m_agent->getRadius() - m_agent->getOutlineThickness() < 0 || m_agent->getPosition().x + m_agent->getRadius() + m_agent->getOutlineThickness() > ScreenSize || m_agent->getPosition().y - m_agent->getRadius() - m_agent->getOutlineThickness() < 0 || m_agent->getPosition().y + m_agent->getRadius() + m_agent->getOutlineThickness() > ScreenSize)
+    {
+        sf::Vector2f newAgentPosition = m_agent->getPosition();
+
+        if (m_agent->getPosition().x - m_agent->getRadius() - m_agent->getOutlineThickness() < 0)
+        {
+            newAgentPosition.x = 0 + m_agent->getRadius() + m_agent->getOutlineThickness();
+        }
+        else if (m_agent->getPosition().x + m_agent->getRadius() + m_agent->getOutlineThickness() > ScreenSize)
+        {
+            newAgentPosition.x = ScreenSize - m_agent->getRadius() - m_agent->getOutlineThickness();
+        }
+        
+        if (m_agent->getPosition().y - m_agent->getRadius() - m_agent->getOutlineThickness() < 0)
+        {
+            newAgentPosition.y = 0 + m_agent->getRadius() + m_agent->getOutlineThickness();
+        }
+        else if (m_agent->getPosition().y + m_agent->getRadius() + m_agent->getOutlineThickness() > ScreenSize)
+        {
+            newAgentPosition.y = ScreenSize - m_agent->getRadius() - m_agent->getOutlineThickness();
+        }
+
+        m_agent->setPosition(newAgentPosition);
+    }
+    
     m_agent->update(deltaTime);
 
     if (m_exitGame)

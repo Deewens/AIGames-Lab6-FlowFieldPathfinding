@@ -44,7 +44,7 @@ private:
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
     sf::CircleShape m_positionPoint;
-    
+
     float m_size;
 
     // (X,Y) coordinates of the node in the grid
