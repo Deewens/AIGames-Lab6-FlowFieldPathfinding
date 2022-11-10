@@ -243,7 +243,7 @@ void Grid::createIntegrationField()
             {
                 const int distance =
                     VectorUtils::getLength(neighbour->getPosition() - goal->getPosition());
-                neighbour->setIntegrationField(current->getCostDistance() + distance);
+                neighbour->setIntegrationField(neighbour->getCostDistance() + distance);
                 std::cout << distance << std::endl;
                 unmarkedNodes.push(neighbour);
             }
