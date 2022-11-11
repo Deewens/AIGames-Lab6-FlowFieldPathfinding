@@ -33,7 +33,7 @@ private:
 
     void loadFonts();
 
-    unsigned int static constexpr ScreenSize = 1900U;
+    unsigned int static constexpr ScreenSize = 800U;
 
     sf::RenderWindow m_window;
 
