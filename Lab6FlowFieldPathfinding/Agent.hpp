@@ -11,25 +11,26 @@ class Agent : public sf::Drawable
 public:
     Agent(Grid& grid, sf::Vector2f startPosition, float maxSpeed, float maxForce);
 
-    sf::Vector2f getPosition();
+    sf::Vector2f getPosition() const;
     void setPosition(sf::Vector2f newPosition);
     void setPosition(float x, float y);
 
-    float getRotation();
+    float getRotation() const;
     void setRotation(float newRotation);
 
-    float getRadius();
+    float getRadius() const;
 
-    float getOutlineThickness();
+    float getOutlineThickness() const;
     
     void update(sf::Time dt);
 
 private:
     /**
-     * \brief 
-     * \return 
+     * \brief Steering behaviour using Bilinear Interpolation
+     * \details https://en.wikipedia.org/wiki/Bilinear_interpolation
+     * \return calculated velocity to be assigned to the agent
      */
-    sf::Vector2f steeringBehaviourFlowField();
+    sf::Vector2f steeringBehaviourFlowField() const;
 
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 

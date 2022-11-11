@@ -1,19 +1,29 @@
-#ifndef LAB1_MATH_HPP
-#define LAB1_MATH_HPP
+#pragma once
 
 class Math
 {
 public:
-    constexpr static const float PI = 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348;
-    constexpr static const float TWO_PI = 6.2831853071795864769252867665590057683943387987502116419498891846156328125724179972560696;
+    constexpr static float PI = 3.14159265358979323846264338327950288419716f;
+    constexpr static float TAU = 6.28318530717958647692528676655900576839433f;
 
+    /**
+     * \brief Convert an angle from degrees to radians
+     * \param degrees angle in degrees
+     * \return converted angle in radians
+     */
     static float convertDegToRad(float degrees);
 
+    /**
+     * \brief Convert an angle from radians to degrees
+     * \param radians angle in radians
+     * \return converted angle in degrees
+     */
     static float convertRadToDeg(float radians);
 
-    static float mapToRange(float angle);
-
+    /**
+     * \brief Wrap an angle in the range [0,360] to the range [-180,180]
+     * \param angle Angle in degrees [0,360] to wrap
+     * \return wrapped angle in the range [-180,180]
+     */
     static float wrapUnsigned(float angle);
 };
-
-#endif //LAB1_MATH_HPP

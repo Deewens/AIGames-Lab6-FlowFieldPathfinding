@@ -18,6 +18,9 @@ public:
     void setLength(float length);
 
 private:
+    /**
+     * \brief Calculate vertices position to draw an arrow
+     */
     void updateVertices();
 
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override;

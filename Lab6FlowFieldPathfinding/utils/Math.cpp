@@ -13,24 +13,6 @@ float Math::convertRadToDeg(float radians)
     return radians * 180 / PI;
 }
 
-float Math::mapToRange(float degrees)
-{
-    float radians = convertDegToRad(degrees);
-
-/*    while (radians < -PI || PI < radians)
-    {
-        if (radians > PI)
-        {
-            radians -= 2 * PI;
-        } else if (radians < -PI)
-        {
-            radians += 2 * PI;
-        }
-    }*/
-
-    return convertRadToDeg(radians);
-}
-
 constexpr float positiveRemainder(float a, float b)
 {
     assert(b > 0.0f);

@@ -5,16 +5,17 @@
 #include "Grid.hpp"
 #include "utils/VectorUtils.hpp"
 
-Node::Node(const FontManager& fontManager, Grid& grid, sf::Vector2i coordinates, float size) :
-    m_size(size),
-    m_coordinates(coordinates),
+Node::Node(const FontManager& fontManager, Grid& grid, const sf::Vector2i coordinates, const float size) :
     m_grid(grid),
+    m_coordinates(coordinates),
+    m_size(size),
     m_costDistance(-1),
     m_integrationField(-1),
     m_vertices(sf::Quads, 4),
-    m_outlineVertices(sf::Lines, 4)
+    m_outlineVertices(sf::Lines, 4),
+    m_isVisualDebugEnabled(false)
 {
-    // Offset from border of window because the origin point of each node is centered
+    // Calculate an offset from the border of the window because the origin point of each node is centered
     const float halfSize = m_size / 2;
     setPosition(static_cast<float>(m_coordinates.x) * m_size + halfSize,
                 static_cast<float>(m_coordinates.y) * m_size + halfSize);
@@ -22,6 +23,7 @@ Node::Node(const FontManager& fontManager, Grid& grid, sf::Vector2i coordinates,
     // Origin is at the center of each node
     setOrigin(halfSize, halfSize);
 
+    // Initialize debugging visualisation
     setupDebugText(fontManager);
 
     createQuadVertices();
@@ -81,7 +83,7 @@ void Node::setQuadColor(sf::Color color)
     }
 }
 
-bool Node::isVisualDebugEnabled()
+bool Node::isVisualDebugEnabled() const
 {
     return m_isVisualDebugEnabled;
 }
@@ -93,14 +95,17 @@ void Node::setVisualDebugEnabled(const bool enabled)
 
 void Node::updateQuadColor()
 {
+    // 0 = Goal Node
     if (m_costDistance == 0)
     {
         setQuadColor(sf::Color::Red);
     }
+    // INT_MAX = Impassable node
     else if (m_costDistance == INT_MAX)
     {
         setQuadColor(sf::Color::Magenta);
     }
+    // Otherwise, assign a color according to the cost to create the heatmap
     else
     {
         const auto heatmapColor = static_cast<sf::Uint8>((50 - m_costDistance) * 255 / 50);
@@ -118,14 +123,12 @@ void Node::createQuadVertices()
 
     // Color the individual quad of the heatmap according to the cost (cost 0 = light bue, cost 255 = black)
     // Inversion of the cost to conform to a [0, 255] range (eg: 0 cost = black = 255 in term of color, so we invert 0 to be 255)
-    //const auto heatmapColor = static_cast<sf::Uint8>((50 - m_cost) * 255 / 50);
+    // const auto heatmapColor = static_cast<sf::Uint8>((50 - m_cost) * 255 / 50);
+    //
+    // To set the color value of the heatmap, take the maximum cost value possible on the graph, and then, for each cost, calculate the rule of three
+    // (MaxCost - cost) * 255 / MaxCost
     const int maxCost = (m_grid.getWidth() - 1) + (m_grid.getHeight() - 1);
     const auto heatmapColor = static_cast<sf::Uint8>((maxCost - m_costDistance) * 255 / maxCost);
-
-    // TODO: To set the color value of the heatmap, take the maximum cost value possible on the graph, and then, for each cost, calculate the rule of three
-    // TODO: (MaxCost - cost) * 255 / MaxCost
-    // TODO: I use 50 above, but it is because I'm using Chebyshev Distance to calculate the cost, which is wrong, I need to do the wavefront algorithm when I create the heatmap, and then update the color with the above calcul
-    // see: https://gamedevelopment.tutsplus.com/tutorials/understanding-goal-based-vector-field-pathfinding--gamedev-9007
 
     for (size_t i = 0; i < m_vertices.getVertexCount(); i++)
     {
@@ -143,7 +146,6 @@ void Node::createOutlineVertices()
     m_outlineVertices[3].position = sf::Vector2f(m_size, m_size);
 
     // 4 vertices are enough to draw the outline, more vertex will overlap anyways
-
     /*m_outlineVertices[4].position = sf::Vector2f(m_size, m_size);
     m_outlineVertices[5].position = sf::Vector2f(0, m_size);
 

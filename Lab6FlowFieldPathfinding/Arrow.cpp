@@ -44,10 +44,8 @@ void Arrow::updateVertices()
 
     m_arrow[0].position = m_position;
     m_arrow[1].position = arrowheadPosition;
-
-    // float height = m_length * std::sqrtf(3);
+    
     float h = m_length * 0.75f;
-    // float halfWidth = m_length * 0.5f;
     float w = h * 0.5f;
 
     const sf::Vector2f backwardVector = arrowheadPosition - m_position;

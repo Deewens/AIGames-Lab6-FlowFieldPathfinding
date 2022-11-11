@@ -1,5 +1,4 @@
-#ifndef LAB1_VECTORUTILS_HPP
-#define LAB1_VECTORUTILS_HPP
+#pragma once
 
 #include <SFML/System.hpp>
 
@@ -24,4 +23,3 @@ public:
 };
 
 #include "VectorUtils.inl"
-#endif //LAB1_VECTORUTILS_HPP

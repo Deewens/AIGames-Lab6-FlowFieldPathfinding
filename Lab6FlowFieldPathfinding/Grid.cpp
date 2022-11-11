@@ -97,7 +97,7 @@ void Grid::setGoalCoordinates(sf::Vector2i goalCoordinates)
     m_goalCoordinates = goalCoordinates;
 }
 
-sf::Vector2i Grid::getGoalCoordinates()
+sf::Vector2i Grid::getGoalCoordinates() const
 {
     return m_goalCoordinates;
 }
@@ -115,26 +115,8 @@ void Grid::draw(sf::RenderTarget& target, sf::RenderStates states) const
     }
 }
 
-void Grid::calculateFlowField()
+void Grid::computeVectorField() const
 {
-    // Refresh
-    for (const auto& node : m_nodes)
-    {
-        node->setCostDistance(-1);
-        node->setIntegrationField(-1);
-        node->setFlowFieldDirection({0, 0});
-    }
-
-    for (auto obstacle : m_obstacles)
-    {
-        auto node = findNode(obstacle);
-        node->setCostDistance(INT_MAX);
-        node->setIntegrationField(INT_MAX);
-    }
-
-    createCostField();
-    createIntegrationField();
-
     for (const auto& node : m_nodes)
     {
         if (node->getCostDistance() == INT_MAX) continue;
@@ -160,6 +142,29 @@ void Grid::calculateFlowField()
             lowestDistance->getPosition() - node->getPosition());
         if (node->getCostDistance() != 0) node->setFlowFieldDirection(directionToClosestNeighbour);
     }
+}
+
+void Grid::calculateFlowField()
+{
+    // Refresh the grid with default values
+    for (const auto& node : m_nodes)
+    {
+        node->setCostDistance(-1);
+        node->setIntegrationField(-1);
+        node->setFlowFieldDirection({0, 0});
+    }
+
+    // Add obstacles to the grid
+    for (auto obstacle : m_obstacles)
+    {
+        auto node = findNode(obstacle);
+        node->setCostDistance(INT_MAX);
+        node->setIntegrationField(INT_MAX);
+    }
+
+    createCostField();
+    createIntegrationField();
+    computeVectorField();
 }
 
 void Grid::createCostField()

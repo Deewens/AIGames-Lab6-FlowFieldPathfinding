@@ -49,7 +49,7 @@ public:
     sf::Vector2f getFlowFieldDirection() const;
     void setFlowFieldDirection(sf::Vector2f fieldDirection);
 
-    bool isVisualDebugEnabled();
+    bool isVisualDebugEnabled() const;
     void setVisualDebugEnabled(bool enabled);
 
 private:

@@ -61,7 +61,7 @@ public:
     sf::Vector2f convertWorldToGridPosition(const sf::Vector2f& worldPosition);
 
     void setGoalCoordinates(sf::Vector2i goalCoordinates);
-    sf::Vector2i getGoalCoordinates();
+    sf::Vector2i getGoalCoordinates() const;
 
 
     std::list<sf::Vector2i> getObstacles();
@@ -87,6 +87,7 @@ private:
     void createIntegrationField();
 
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+    void computeVectorField() const;
 
     std::vector<std::shared_ptr<Node>> m_nodes;
 

@@ -4,7 +4,7 @@
 
 #include "utils/VectorUtils.hpp"
 
-Agent::Agent(Grid& grid, sf::Vector2f startPosition, float maxSpeed, float maxForce) :
+Agent::Agent(Grid& grid, const sf::Vector2f startPosition, const float maxSpeed, const float maxForce) :
     m_grid(grid),
     m_maxSpeed(maxSpeed),
     m_maxForce(maxForce)
@@ -17,12 +17,12 @@ Agent::Agent(Grid& grid, sf::Vector2f startPosition, float maxSpeed, float maxFo
     m_shape.setOrigin(m_shape.getRadius(), m_shape.getRadius());
 }
 
-sf::Vector2f Agent::getPosition()
+sf::Vector2f Agent::getPosition() const
 {
     return m_shape.getPosition();
 }
 
-void Agent::setPosition(sf::Vector2f newPosition)
+void Agent::setPosition(const sf::Vector2f newPosition)
 {
     m_shape.setPosition(newPosition);
 }
@@ -32,22 +32,22 @@ void Agent::setPosition(float x, float y)
     m_shape.setPosition({x, y});
 }
 
-float Agent::getRotation()
+float Agent::getRotation() const
 {
     return m_shape.getRotation();
 }
 
-void Agent::setRotation(float newRotation)
+void Agent::setRotation(const float newRotation)
 {
     m_shape.setRotation(newRotation);
 }
 
-float Agent::getRadius()
+float Agent::getRadius() const
 {
     return m_shape.getRadius();
 }
 
-float Agent::getOutlineThickness()
+float Agent::getOutlineThickness() const
 {
     return m_shape.getOutlineThickness();
 }
@@ -55,7 +55,7 @@ float Agent::getOutlineThickness()
 
 void Agent::update(const sf::Time dt)
 {
-    auto forceToApply = steeringBehaviourFlowField();
+    const auto forceToApply = steeringBehaviourFlowField();
 
     m_velocity = m_velocity + (forceToApply * dt.asSeconds());
 
@@ -75,7 +75,7 @@ void Agent::draw(sf::RenderTarget& target, sf::RenderStates states) const
     target.draw(m_shape);
 }
 
-sf::Vector2f Agent::steeringBehaviourFlowField()
+sf::Vector2f Agent::steeringBehaviourFlowField() const
 {
     const sf::Vector2i nodeCoords = m_grid.convertWorldToGridCoordinates(getPosition());
     //std::cout << "\rGrid coords: " << nodeCoords.x << " " << nodeCoords.y << "\tAgent pos: " << getPosition().x << " " << getPosition().y << std::flush;
@@ -135,14 +135,7 @@ sf::Vector2f Agent::steeringBehaviourFlowField()
 
     const auto yWeight = nodeGridPos.y - static_cast<float>(nodeCoords.y);
 
-    auto direction = VectorUtils::normalize((top * (1 - yWeight)) + (bottom * yWeight));
-        /*
-    if (m_grid.findNode({nodeCoords.x, nodeCoords.y + 1}) == nullptr)
-    {
-        direction = sf::Vector2f(0, -1);
-    }*/
-    //std::cout << "\r" << direction.x << " " << direction.y << "                ";
-
+    const auto direction = VectorUtils::normalize((top * (1 - yWeight)) + (bottom * yWeight));
     if (std::isnan(VectorUtils::getLength(direction)))
     {
         return {0, 0};
