@@ -10,10 +10,10 @@ Agent::Agent(Grid& grid, const sf::Vector2f startPosition, const float maxSpeed,
     m_maxForce(maxForce)
 {
     m_shape.setFillColor(sf::Color::Cyan);
-    m_shape.setOutlineThickness(3);
+    m_shape.setOutlineThickness(1);
     m_shape.setOutlineColor(sf::Color::Cyan);
     m_shape.setPosition(startPosition);
-    m_shape.setRadius(12);
+    m_shape.setRadius(5);
     m_shape.setOrigin(m_shape.getRadius(), m_shape.getRadius());
 }
 
