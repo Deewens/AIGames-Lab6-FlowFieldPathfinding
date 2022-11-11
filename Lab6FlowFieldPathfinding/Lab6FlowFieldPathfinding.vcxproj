@@ -92,6 +92,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <Content Include="ASSETS\FONTS\ariblk.ttf" />
+    <Content Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Agent.hpp" />
