@@ -84,7 +84,7 @@ sf::Vector2f Agent::steeringBehaviourFlowField() const
     sf::Vector2f f01;
     sf::Vector2f f10;
     sf::Vector2f f11;
-    
+
     const auto node00 = m_grid.findNode({nodeCoords.x, nodeCoords.y});
     const auto node01 = m_grid.findNode({nodeCoords.x, nodeCoords.y + 1});
     const auto node10 = m_grid.findNode({nodeCoords.x + 1, nodeCoords.y});
@@ -98,7 +98,7 @@ sf::Vector2f Agent::steeringBehaviourFlowField() const
         // Return no velocity because the agent is not on a node parts of the grid
         return {0, 0};
     }
-    
+
     if (node01 != nullptr)
     {
         f01 = sf::Vector2f(node01->getFlowFieldDirection());
@@ -115,7 +115,7 @@ sf::Vector2f Agent::steeringBehaviourFlowField() const
     {
         f10 = sf::Vector2f(-1, 0);
     }
-    
+
     if (node11 != nullptr)
     {
         f11 = sf::Vector2f(node11->getFlowFieldDirection());
@@ -123,7 +123,6 @@ sf::Vector2f Agent::steeringBehaviourFlowField() const
     else
     {
         f11 = sf::Vector2f(1, 1);
-
     }
 
     const sf::Vector2f nodeGridPos = m_grid.convertWorldToGridPosition(getPosition());
