@@ -102,6 +102,11 @@ sf::Vector2i Grid::getGoalCoordinates()
     return m_goalCoordinates;
 }
 
+std::list<sf::Vector2i> Grid::getObstacles()
+{
+    return m_obstacles;
+}
+
 void Grid::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
     for (auto& node : m_nodes)
@@ -134,7 +139,7 @@ void Grid::calculateFlowField()
     {
         if (node->getCostDistance() == INT_MAX) continue;
         const auto neighbours = node->getNeighbours();
-        
+
         std::shared_ptr<Node> lowestDistance = nullptr;
         for (size_t i = 0; i < neighbours.size(); i++)
         {
@@ -144,44 +149,17 @@ void Grid::calculateFlowField()
                 lowestDistance = neighbours[i];
                 continue;
             }
-            
+
             if (neighbours[i]->getIntegrationField() < lowestDistance->getIntegrationField())
             {
                 lowestDistance = neighbours[i];
             }
         }
 
-        const auto directionToClosestNeighbour = VectorUtils::normalize(lowestDistance->getPosition() - node->getPosition());
+        const auto directionToClosestNeighbour = VectorUtils::normalize(
+            lowestDistance->getPosition() - node->getPosition());
         if (node->getCostDistance() != 0) node->setFlowFieldDirection(directionToClosestNeighbour);
     }
-
-    /*for (const auto& node : m_nodes)
-    {
-        if (node->getCostDistance() == INT_MAX)
-        {
-            continue;
-        }
-
-        const auto neighbours = node->getNeighbours();
-
-        auto lowestIntegrationField = neighbours[0];
-        for (size_t i = 1; i < neighbours.size(); i++)
-        {
-            if (neighbours[i]->getIntegrationField() < lowestIntegrationField->getIntegrationField())
-            {
-                lowestIntegrationField = neighbours[i];
-            }
-        }
-
-        // The direction is already normalised
-        sf::Vector2f direction;
-        direction = VectorUtils::normalize(lowestIntegrationField->getPosition() - node->getPosition());
-
-        /*std::cout << "Lowest: " << lowestIntegrationField->getPosition().x << ", " << lowestIntegrationField->getPosition().y << std::endl;
-        std::cout << "Node: " << node->getPosition().x << ", " << node->getPosition().y << std::endl;
-        //std::cout << direction.x << ", " << direction.y << std::endl;
-        if (node->getCostDistance() != 0) node->setFlowFieldDirection(direction);
-    }*/
 }
 
 void Grid::createCostField()
@@ -222,32 +200,54 @@ void Grid::createIntegrationField()
         const auto current = unmarkedNodes.front();
         unmarkedNodes.pop();
 
-        //if (current->getCostDistance() == INT_MAX) continue;
-
         auto neighbours = current->getNeighbours();
         for (auto& neighbour : neighbours)
         {
-            //if (neighbour->getCostDistance() == INT_MAX) continue;
-
-            /*if (neighbour->getIntegrationField() == -1)
-            {
-                unmarkedNodes.push(neighbour);
-
-                const int distance = std::max(std::abs(neighbour->getPosition().x - goal->getPosition().x),
-                                              std::abs(neighbour->getPosition().y - goal->getPosition().y));
-
-                neighbour->setIntegrationField(neighbour->getCostDistance() + distance);
-            }*/
-
             if (neighbour->getIntegrationField() == -1 && neighbour->getIntegrationField() != INT_MAX)
             {
                 const int distance =
                     VectorUtils::getLength(neighbour->getPosition() - goal->getPosition());
-                neighbour->setIntegrationField(neighbour->getCostDistance() + distance);
-                std::cout << distance << std::endl;
+                neighbour->setIntegrationField(neighbour->getCostDistance() * 100 + distance);
                 unmarkedNodes.push(neighbour);
             }
         }
+    }
+}
+
+void Grid::setStartPosition(sf::Vector2i coordinates)
+{
+    m_pathFromStart.clear();
+    m_pathFromStart.push_back(coordinates);
+    calculatePathFromStart();
+}
+
+void Grid::toggleDebugData()
+{
+    for (const auto node : m_nodes)
+    {
+        node->setVisualDebugEnabled(!node->isVisualDebugEnabled());
+    }
+}
+
+void Grid::calculatePathFromStart()
+{
+    const auto startCoordinates = m_pathFromStart[0];
+
+    auto currentNode = findNode(startCoordinates);
+    currentNode->setQuadColor(sf::Color::Green);
+    while (currentNode->getCostDistance() != 0)
+    {
+        const auto nextNode = currentNode->findNextNode();
+        if (nextNode == nullptr) break;
+
+        m_pathFromStart.push_back(nextNode->getCoordinates());
+        if (nextNode->getCostDistance() != 0)
+        {
+            nextNode->setQuadColor(sf::Color::Yellow);
+        }
+
+
+        currentNode = nextNode;
     }
 }
 

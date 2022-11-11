@@ -36,7 +36,7 @@ private:
 
     void loadFonts();
 
-    unsigned int static constexpr ScreenSize = 840U;
+    unsigned int static constexpr ScreenSize = 1900U;
 
     sf::RenderWindow m_window; // main SFML window
     bool m_exitGame; // control exiting game

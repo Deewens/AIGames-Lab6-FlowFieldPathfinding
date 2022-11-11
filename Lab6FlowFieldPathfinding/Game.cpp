@@ -9,17 +9,17 @@
 /// load and setup the image
 /// </summary>
 Game::Game() :
-        m_window{sf::VideoMode{ScreenSize, ScreenSize, 32U}, "SFML Game"},
-        m_exitGame{false} //when true game will exit
+    m_window{sf::VideoMode{ScreenSize, ScreenSize, 32U}, "SFML Game"},
+    m_exitGame{false} //when true game will exit
 {
     loadFonts();
 
-    constexpr int gridSize = ScreenSize / 60;
+    constexpr int gridSize = 50;
 
-    m_grid = new Grid(m_fontManager, gridSize, gridSize, 60, {{5, 10}, {10, 5}});
+    m_grid = new Grid(m_fontManager, gridSize, gridSize, ScreenSize / gridSize, {{5, 10}, {10, 5}});
     /*m_grid->calculateFlowField(sf::Vector2i(10, 10));*/
 
-    m_agent = new Agent(*m_grid, m_grid->findNode({2, 2})->getPosition(), 80.f, 200.f);
+    m_agent = new Agent(*m_grid, m_grid->findNode({2, 2})->getPosition(), 60.f, 150.f);
 }
 
 /// <summary>
@@ -89,16 +89,22 @@ void Game::processEvents()
 /// <summary>
 /// deal with key presses from the user
 /// </summary>
-/// <param name="t_event">key press event</param>
+/// <param name="event">key press event</param>
 void Game::processKeys(sf::Event event)
 {
+    // Toggle debug on/off
+    if (sf::Keyboard::D == event.key.code)
+    {
+        m_grid->toggleDebugData();
+    }
+
     if (sf::Keyboard::Escape == event.key.code)
     {
         m_exitGame = true;
     }
 }
 
-void Game::processMouse(const sf::Event &event) const
+void Game::processMouse(const sf::Event& event) const
 {
     if (event.mouseButton.button == sf::Mouse::Left)
     {
@@ -108,7 +114,21 @@ void Game::processMouse(const sf::Event &event) const
 
         m_grid->setGoalCoordinates(mouseGridPosition);
         m_grid->calculateFlowField();
+        m_grid->setStartPosition(m_grid->convertWorldToGridCoordinates(m_agent->getPosition()));
     }
+
+    if (event.mouseButton.button == sf::Mouse::Middle)
+    {
+        const sf::Vector2i mousePosition = sf::Vector2i(event.mouseButton.x, event.mouseButton.y);
+        // Convert window pixel coordinates to the grid coordinates
+        const sf::Vector2i mouseGridPosition = mousePosition / static_cast<int>(m_grid->getNodeSize());
+
+        m_grid->calculateFlowField();
+
+        m_grid->setStartPosition(mouseGridPosition);
+        m_agent->setPosition(m_grid->findNode(mouseGridPosition)->getPosition());
+    }
+
     // Place/remove walls
     if (event.mouseButton.button == sf::Mouse::Right)
     {
@@ -116,8 +136,23 @@ void Game::processMouse(const sf::Event &event) const
         // Convert window pixel coordinates to the grid coordinates
         const sf::Vector2i mouseGridPosition = mousePosition / static_cast<int>(m_grid->getNodeSize());
 
-        m_grid->addObstacle(mouseGridPosition.x, mouseGridPosition.y);
+        auto obstacles = m_grid->getObstacles();
+        const auto find = std::find_if(obstacles.begin(), obstacles.end(), [=](sf::Vector2i obstaclePos)
+        {
+            return obstaclePos.x == mouseGridPosition.x && obstaclePos.y == mouseGridPosition.y;
+        });
+
+        if (find == obstacles.end())
+        {
+            m_grid->addObstacle(mouseGridPosition.x, mouseGridPosition.y);
+        }
+        else
+        {
+            m_grid->removeObstacle(mouseGridPosition.x, mouseGridPosition.y);
+        }
+
         m_grid->calculateFlowField();
+        m_grid->calculatePathFromStart();
     }
 }
 
@@ -125,9 +160,12 @@ void Game::processMouse(const sf::Event &event) const
 /// Update the game world
 /// </summary>
 /// <param name="deltaTime">time interval per frame</param>
-void Game::update(sf::Time deltaTime)
+void Game::update(const sf::Time deltaTime)
 {
-    if (m_agent->getPosition().x - m_agent->getRadius() - m_agent->getOutlineThickness() < 0 || m_agent->getPosition().x + m_agent->getRadius() + m_agent->getOutlineThickness() > ScreenSize || m_agent->getPosition().y - m_agent->getRadius() - m_agent->getOutlineThickness() < 0 || m_agent->getPosition().y + m_agent->getRadius() + m_agent->getOutlineThickness() > ScreenSize)
+    if (m_agent->getPosition().x - m_agent->getRadius() - m_agent->getOutlineThickness() < 0 || m_agent->getPosition().x
+        + m_agent->getRadius() + m_agent->getOutlineThickness() > ScreenSize || m_agent->getPosition().y - m_agent->
+        getRadius() - m_agent->getOutlineThickness() < 0 || m_agent->getPosition().y + m_agent->getRadius() + m_agent->
+        getOutlineThickness() > ScreenSize)
     {
         sf::Vector2f newAgentPosition = m_agent->getPosition();
 
@@ -139,7 +177,7 @@ void Game::update(sf::Time deltaTime)
         {
             newAgentPosition.x = ScreenSize - m_agent->getRadius() - m_agent->getOutlineThickness();
         }
-        
+
         if (m_agent->getPosition().y - m_agent->getRadius() - m_agent->getOutlineThickness() < 0)
         {
             newAgentPosition.y = 0 + m_agent->getRadius() + m_agent->getOutlineThickness();
@@ -151,7 +189,7 @@ void Game::update(sf::Time deltaTime)
 
         m_agent->setPosition(newAgentPosition);
     }
-    
+
     m_agent->update(deltaTime);
 
     if (m_exitGame)

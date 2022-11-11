@@ -15,7 +15,7 @@ public:
     static float vectorToAngle(T vector);
 
     template<class T>
-    static float getLength(sf::Vector2<T> v);
+    static T getLength(sf::Vector2<T> v);
 
     template<class T>
     static sf::Vector2<T> normalize(sf::Vector2<T> v);

@@ -4,7 +4,7 @@
 #include <cmath>
 
 template <class T>
-float VectorUtils::getLength(sf::Vector2<T> v)
+T VectorUtils::getLength(sf::Vector2<T> v)
 {
     return std::sqrt(v.x * v.x + v.y * v.y);
 }

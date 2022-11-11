@@ -35,13 +35,26 @@ public:
     void setGoalCoordinates(sf::Vector2i goalCoordinates);
     sf::Vector2i getGoalCoordinates();
 
+
+
+    std::list<sf::Vector2i> getObstacles();
     void addObstacle(int x, int y);
     void removeObstacle(int x, int y);
+
+    void setStartPosition(sf::Vector2i coordinates);
+    void calculatePathFromStart();
+    
+    void toggleDebugData();
 
 private:
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 
     std::vector<std::shared_ptr<Node>> m_nodes;
+    
+    void createCostField();
+
+    void createIntegrationField();
+
 
     // Number of columns of the grid
     int m_width;
@@ -51,12 +64,10 @@ private:
     float m_nodeSize;
 
     sf::Vector2i m_goalCoordinates;
+
+    std::vector<sf::Vector2i> m_pathFromStart;
     
     std::list<sf::Vector2i> m_obstacles;
-
-    void createCostField();
-
-    void createIntegrationField();
 };
 
 

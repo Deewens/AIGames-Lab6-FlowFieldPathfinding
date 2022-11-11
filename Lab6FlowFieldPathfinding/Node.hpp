@@ -29,9 +29,15 @@ public:
 
     std::vector<std::shared_ptr<Node>> getNeighbours(bool includeDiagonals = true) const;
 
-    sf::Vector2i getCoordinates();
-private:
+    sf::Vector2i getCoordinates() const;
+
+    std::shared_ptr<Node> findNextNode() const;
+
     void setQuadColor(sf::Color color);
+
+    bool isVisualDebugEnabled();
+    void setVisualDebugEnabled(bool enabled);
+private:
 
     void updateQuadColor();
 
@@ -65,6 +71,8 @@ private:
 
     sf::VertexArray m_vertices;
     sf::VertexArray m_outlineVertices;
+
+    bool m_isVisualDebugEnabled;
 };
 
 

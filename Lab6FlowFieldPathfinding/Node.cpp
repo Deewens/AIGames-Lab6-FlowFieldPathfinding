@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "Grid.hpp"
+#include "utils/VectorUtils.hpp"
 
 Node::Node(const FontManager& fontManager, Grid& grid, sf::Vector2i coordinates, float size) :
     m_size(size),
@@ -80,6 +81,16 @@ void Node::setQuadColor(sf::Color color)
     }
 }
 
+bool Node::isVisualDebugEnabled()
+{
+    return m_isVisualDebugEnabled;
+}
+
+void Node::setVisualDebugEnabled(const bool enabled)
+{
+    m_isVisualDebugEnabled = enabled;
+}
+
 void Node::updateQuadColor()
 {
     if (m_costDistance == 0)
@@ -125,14 +136,14 @@ void Node::createQuadVertices()
 void Node::createOutlineVertices()
 {
     // Draw vertices according to local coordinates of the cell
-    m_outlineVertices[0].position =  sf::Vector2f(0, 0);
+    m_outlineVertices[0].position = sf::Vector2f(0, 0);
     m_outlineVertices[1].position = sf::Vector2f(m_size, 0);
 
     m_outlineVertices[2].position = sf::Vector2f(m_size, 0);
     m_outlineVertices[3].position = sf::Vector2f(m_size, m_size);
 
     // 4 vertices are enough to draw the outline, more vertex will overlap anyways
-    
+
     /*m_outlineVertices[4].position = sf::Vector2f(m_size, m_size);
     m_outlineVertices[5].position = sf::Vector2f(0, m_size);
 
@@ -151,12 +162,15 @@ void Node::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
     target.draw(m_vertices, states);
     target.draw(m_outlineVertices, states);
-    if (m_costDistance != INT_MAX) target.draw(m_costText, states);
-    target.draw(m_integrationFieldText, states);
 
-    if (m_flowFieldDirection != sf::Vector2f(0, 0)) target.draw(m_arrow, states);
+    if (m_isVisualDebugEnabled)
+    {
+        if (m_costDistance != INT_MAX) target.draw(m_costText, states);
+        target.draw(m_integrationFieldText, states);
+        if (m_flowFieldDirection != sf::Vector2f(0, 0)) target.draw(m_arrow, states);
 
-    target.draw(m_positionPoint);
+        target.draw(m_positionPoint);
+    }
 }
 
 void Node::setupDebugText(const FontManager& fontManager)
@@ -203,7 +217,23 @@ std::vector<std::shared_ptr<Node>> Node::getNeighbours(bool includeDiagonals) co
     return neighbours;
 }
 
-sf::Vector2i Node::getCoordinates()
+sf::Vector2i Node::getCoordinates() const
 {
     return m_coordinates;
+}
+
+std::shared_ptr<Node> Node::findNextNode() const
+{
+    const auto neighbours = getNeighbours();
+
+    for (auto neighbour : neighbours)
+    {
+        auto directionToNeighbour = VectorUtils::normalize(neighbour->getPosition() - getPosition());
+        if (directionToNeighbour == m_flowFieldDirection)
+        {
+            return neighbour;
+        }
+    }
+
+    return nullptr;
 }
