@@ -16,10 +16,7 @@ public:
     Game();
 
     ~Game();
-
-    /// <summary>
-    /// main method for game
-    /// </summary>
+    
     void run();
 
 private:
@@ -38,15 +35,14 @@ private:
 
     unsigned int static constexpr ScreenSize = 1900U;
 
-    sf::RenderWindow m_window; // main SFML window
-    bool m_exitGame; // control exiting game
-
-    Grid* m_grid;
-
-    Agent* m_agent;
+    sf::RenderWindow m_window;
 
     FontManager m_fontManager;
+    
+    bool m_exitGame;
 
+    Grid* m_grid;
+    Agent* m_agent;
 };
 
 #endif // !GAME_HPP

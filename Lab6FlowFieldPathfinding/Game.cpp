@@ -2,12 +2,6 @@
 
 #include <iostream>
 
-/// <summary>
-/// default constructor
-/// setup the window properties
-/// load and setup the text
-/// load and setup the image
-/// </summary>
 Game::Game() :
     m_window{sf::VideoMode{ScreenSize, ScreenSize, 32U}, "SFML Game"},
     m_exitGame{false} //when true game will exit
@@ -22,10 +16,6 @@ Game::Game() :
     m_agent = new Agent(*m_grid, m_grid->findNode({2, 2})->getPosition(), 60.f, 150.f);
 }
 
-/// <summary>
-/// default destructor we did not dynamically allocate anything
-/// so we don't need to free it, but method needs to be here
-/// </summary>
 Game::~Game()
 {
     delete m_grid;
@@ -63,7 +53,7 @@ void Game::run()
 /// <summary>
 /// handle user and system events/ input
 /// get key presses/ mouse moves etc. from OS
-/// and user :: Don't do game update here
+/// and user
 /// </summary>
 void Game::processEvents()
 {
@@ -106,6 +96,7 @@ void Game::processKeys(sf::Event event)
 
 void Game::processMouse(const sf::Event& event) const
 {
+    // Left-click in a cell to set the coordinates of the goal
     if (event.mouseButton.button == sf::Mouse::Left)
     {
         const sf::Vector2i mousePosition = sf::Vector2i(event.mouseButton.x, event.mouseButton.y);
@@ -117,6 +108,7 @@ void Game::processMouse(const sf::Event& event) const
         m_grid->setStartPosition(m_grid->convertWorldToGridCoordinates(m_agent->getPosition()));
     }
 
+    // Middle-click in a cell to set the coordinates of the start cell
     if (event.mouseButton.button == sf::Mouse::Middle)
     {
         const sf::Vector2i mousePosition = sf::Vector2i(event.mouseButton.x, event.mouseButton.y);
@@ -162,6 +154,7 @@ void Game::processMouse(const sf::Event& event) const
 /// <param name="deltaTime">time interval per frame</param>
 void Game::update(const sf::Time deltaTime)
 {
+    // Ugly code that does collision check against window border (prevent some bugs where the Agent just go through the border of the window and never come back)
     if (m_agent->getPosition().x - m_agent->getRadius() - m_agent->getOutlineThickness() < 0 || m_agent->getPosition().x
         + m_agent->getRadius() + m_agent->getOutlineThickness() > ScreenSize || m_agent->getPosition().y - m_agent->
         getRadius() - m_agent->getOutlineThickness() < 0 || m_agent->getPosition().y + m_agent->getRadius() + m_agent->

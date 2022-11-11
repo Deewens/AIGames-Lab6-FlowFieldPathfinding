@@ -12,13 +12,10 @@ public:
     Agent(Grid& grid, sf::Vector2f startPosition, float maxSpeed, float maxForce);
 
     sf::Vector2f getPosition();
-
     void setPosition(sf::Vector2f newPosition);
-
     void setPosition(float x, float y);
 
     float getRotation();
-
     void setRotation(float newRotation);
 
     float getRadius();
@@ -28,16 +25,20 @@ public:
     void update(sf::Time dt);
 
 private:
+    /**
+     * \brief 
+     * \return 
+     */
     sf::Vector2f steeringBehaviourFlowField();
 
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 
-    sf::CircleShape m_shape;
-
+    // Reference of the grid where the agent navigate in
     Grid& m_grid;
 
-    sf::Vector2f m_velocity;
+    sf::CircleShape m_shape;
 
+    sf::Vector2f m_velocity;
     float m_maxSpeed;
     float m_maxForce;
 };
